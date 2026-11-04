@@ -2,8 +2,11 @@ import json
 from pathlib import Path
 
 import joblib
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 import streamlit as st
+from sklearn.metrics import classification_report, confusion_matrix
 
 from evaluation import METRIC_COLUMNS, TARGET, compute_metrics
 
@@ -27,6 +30,20 @@ def load_model(name):
 @st.cache_data
 def load_feature_columns():
     return json.loads((MODEL_DIR / "feature_columns.json").read_text())
+
+
+def plot_confusion(y_true, y_pred, labels):
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    fig, ax = plt.subplots(figsize=(7, 5.5))
+    sns.heatmap(
+        cm, annot=True, fmt="d", cmap="YlGnBu", cbar=False,
+        xticklabels=labels, yticklabels=labels, ax=ax,
+    )
+    ax.set_xlabel("Predicted bean type")
+    ax.set_ylabel("Actual bean type")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    return fig
 
 
 st.title("🫘 Dry Bean Type Classifier")
@@ -79,3 +96,26 @@ cols = st.columns(len(METRIC_COLUMNS))
 for col, metric in zip(cols, METRIC_COLUMNS):
     col.metric(metric, f"{scores[metric]:.4f}")
 st.caption("Precision, recall and F1 are macro-averaged over the 7 bean types; AUC is one-vs-rest.")
+
+left, right = st.columns(2)
+labels = list(model.classes_)
+with left:
+    st.markdown("**Confusion matrix**")
+    st.pyplot(plot_confusion(y, y_pred, labels))
+with right:
+    st.markdown("**Classification report**")
+    report = classification_report(y, y_pred, output_dict=True, zero_division=0)
+    st.dataframe(pd.DataFrame(report).T.round(3), width="stretch")
+
+st.subheader("All five models on this file")
+rows = {}
+for name in MODEL_FILES:
+    rows[name], _ = compute_metrics(load_model(name), X, y)
+comparison = pd.DataFrame(rows).T[METRIC_COLUMNS]
+comparison.index.name = "ML Model Name"
+st.dataframe(
+    comparison.style.format("{:.4f}").highlight_max(axis=0, color="#c8e6c9"),
+    width="stretch",
+)
+best = comparison["F1"].idxmax()
+st.success(f"Best F1 on this file: **{best}** ({comparison.loc[best, 'F1']:.4f})")
