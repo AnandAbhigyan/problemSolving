@@ -1,7 +1,5 @@
 # Dry Bean Classification (ML Assignment 2)
 
-> Work in progress. The deployment link gets added once the app is live.
-
 ## 1. Problem statement
 Dry beans look a lot alike to the human eye, yet a batch that is mixed up with the wrong variety is a real headache for sellers and seed producers. The goal here is to see whether the shape measurements of a single bean, all taken from a photo, are enough to tell its variety apart. This is a 7-class classification problem. I train five classic models on the same data, compare them on the same held-out test set, and put them behind a small Streamlit app so anyone can try them on their own CSV.
 
@@ -44,7 +42,7 @@ All numbers are measured on `test_data.csv` (2,723 beans the models never saw du
 **Overall winner:** the **Support Vector Machine**. It leads on accuracy, precision, recall, F1 and MCC. Logistic Regression has a slightly higher AUC, so if you only cared about probability ranking or needed a tiny, fast model, it would be a very fair pick. The gap between the top three is only about one percentage point, so I wouldn't read too much into small differences; the clear lesson is that Naive Bayes is a poor fit for this correlated data. Sira is the toughest class for the four better models (F1 of 0.86–0.87), while Bombay is separated almost perfectly by all five (F1 of 0.995–1.0).
 
 ## 5. Streamlit app
-_Live link to be added after deployment on Streamlit Community Cloud._
+**Live app:** https://drybean-classifier.streamlit.app/ (deployed on Streamlit Community Cloud)
 
 The app lets you:
 1. upload a CSV (use `test_data.csv`; it needs the 16 feature columns plus `Class`),
