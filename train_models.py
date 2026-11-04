@@ -5,6 +5,8 @@ from pathlib import Path
 import joblib
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
@@ -20,6 +22,8 @@ MODELS = {
         StandardScaler(), LogisticRegression(max_iter=2000, random_state=SEED)
     ),
     "Decision Tree": DecisionTreeClassifier(max_depth=8, random_state=SEED),
+    "KNN": make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=7)),
+    "Naive Bayes": GaussianNB(),
 }
 
 
