@@ -4,11 +4,13 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from evaluation import TARGET, compute_metrics
@@ -24,6 +26,13 @@ MODELS = {
     "Decision Tree": DecisionTreeClassifier(max_depth=8, random_state=SEED),
     "KNN": make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=7)),
     "Naive Bayes": GaussianNB(),
+    # SVC has no native probabilities; calibration gives us them for the AUC score
+    "Support Vector Machine": make_pipeline(
+        StandardScaler(),
+        CalibratedClassifierCV(
+            SVC(kernel="rbf", C=10, random_state=SEED), ensemble=False, cv=5
+        ),
+    ),
 }
 
 
